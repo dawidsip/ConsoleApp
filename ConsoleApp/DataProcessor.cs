@@ -1,20 +1,23 @@
-﻿namespace ConsoleApp
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-    using System.IO;
-    using System.Linq;
-    using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
+namespace ConsoleApp
+{
     public class DataReader
     {
-        IEnumerable<ImportedObject> ImportedObjects;
+        private IEnumerable<ImportedObject> importedObjects;
 
+        public DataReader()
+        {
+            importedObjects = new List<ImportedObject>();
+        }
+        
         public void ImportAndPrintData(string fileToImport, bool printData = true)
         {
-            ImportedObjects = new List<ImportedObject>() { new ImportedObject() };
-
             var streamReader = new StreamReader(fileToImport);
 
             var importedLines = new List<string>();
@@ -36,11 +39,11 @@
                 importedObject.ParentType = values[4];
                 importedObject.DataType = values[5];
                 importedObject.IsNullable = values[6];
-                ((List<ImportedObject>)ImportedObjects).Add(importedObject);
+                ((List<ImportedObject>)importedObjects).Add(importedObject);
             }
 
             // clear and correct imported data
-            foreach (var importedObject in ImportedObjects)
+            foreach (var importedObject in importedObjects)
             {
                 importedObject.Type = importedObject.Type.Trim().Replace(" ", "").Replace(Environment.NewLine, "").ToUpper();
                 importedObject.Name = importedObject.Name.Trim().Replace(" ", "").Replace(Environment.NewLine, "");
@@ -50,10 +53,10 @@
             }
 
             // assign number of children
-            for (int i = 0; i < ImportedObjects.Count(); i++)
+            for (int i = 0; i < importedObjects.Count(); i++)
             {
-                var importedObject = ImportedObjects.ToArray()[i];
-                foreach (var impObj in ImportedObjects)
+                var importedObject = importedObjects.ToArray()[i];
+                foreach (var impObj in importedObjects)
                 {
                     if (impObj.ParentType == importedObject.Type)
                     {
@@ -65,14 +68,14 @@
                 }
             }
 
-            foreach (var database in ImportedObjects)
+            foreach (var database in importedObjects)
             {
                 if (database.Type == "DATABASE")
                 {
                     Console.WriteLine($"Database '{database.Name}' ({database.NumberOfChildren} tables)");
 
                     // print all database's tables
-                    foreach (var table in ImportedObjects)
+                    foreach (var table in importedObjects)
                     {
                         if (table.ParentType.ToUpper() == database.Type)
                         {
@@ -81,7 +84,7 @@
                                 Console.WriteLine($"\tTable '{table.Schema}.{table.Name}' ({table.NumberOfChildren} columns)");
 
                                 // print all table's columns
-                                foreach (var column in ImportedObjects)
+                                foreach (var column in importedObjects)
                                 {
                                     if (column.ParentType.ToUpper() == table.Type)
                                     {
@@ -99,32 +102,5 @@
 
             Console.ReadLine();
         }
-    }
-
-    class ImportedObject : ImportedObjectBaseClass
-    {
-        public string Name
-        {
-            get;
-            set;
-        }
-        public string Schema;
-
-        public string ParentName;
-        public string ParentType
-        {
-            get; set;
-        }
-
-        public string DataType { get; set; }
-        public string IsNullable { get; set; }
-
-        public double NumberOfChildren;
-    }
-
-    class ImportedObjectBaseClass
-    {
-        public string Name { get; set; }
-        public string Type { get; set; }
     }
 }
