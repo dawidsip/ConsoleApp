@@ -3,20 +3,19 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace ConsoleApp
 {
     public class DataProcessor
     {
         private List<ImportedObject> _importedObjects = new List<ImportedObject>();
-        public IEnumerable<ImportedObject> ImportedObjects { get { 
-                                                                    return _importedObjects 
-                                                                 }
-                                                             set { 
-                                                                    _importedObjects = value; 
-                                                                 } 
-                                                           }
+        IEnumerable<ImportedObject> ImportedObjects { get { 
+                                                                return _importedObjects; 
+                                                            }
+                                                        set { 
+                                                                _importedObjects = value.ToList(); 
+                                                            } 
+                                                    }
 
         public DataProcessor()
         {
@@ -39,17 +38,18 @@ namespace ConsoleApp
             AssignNumberOfChildren();
         }
 
-        private void AssignNumberOfChildren()
-        {
-            importedObjects.ForEach(parent => 
-                    importedObjects.ForEach(child => if (child.ParentType == parent.Type && child.ParentName == parent.Name)
-                    {
-                        parent.NumberOfChildren += 1; 
-                    }));
-
-            importedObjects.ForEach(parent => 
-                    parent.NumberOfChildren = importedObjects.Where(child => child.ParentType == parent.Type && child.ParentName == parent.Name).Count());
-        }
+        public void PrintData() =>
+            _importedObjects
+                .Where(database => database.Type == "DATABASE")
+                .ToList()
+                .ForEach(database => { 
+                                        Console.WriteLine($"Database '{database.Name}' ({database.NumberOfChildren} tables)");
+                                        PrintDatabaseTables(database.Type, database.Name);
+                                     });
+                                     
+        private void AssignNumberOfChildren() =>
+            _importedObjects.ForEach(parent => 
+                    parent.NumberOfChildren = _importedObjects.Where(child => child.ParentType == parent.Type && child.ParentName == parent.Name).Count());
 
         private void CorrectImportedObjects() =>
             _importedObjects.ForEach(importedObject =>
@@ -63,8 +63,9 @@ namespace ConsoleApp
 
         private List<ImportedObject> MapToImportedObject(List<string> importedLines) =>
             importedLines.Select(line => line.Split(';'))
+                        .Where(values => values.Length == 7)
                         .Select(values => new ImportedObject()
-                                        {
+                                        { //Type;Name;Schema;ParentName;ParentType;DataType;IsNullable
                                             Type = values[0],
                                             Name = values[1],
                                             Schema = values[2],
@@ -77,7 +78,7 @@ namespace ConsoleApp
         
         private void PrintTablesColumns(string tableType, string tableName) =>
             _importedObjects
-                .Where(col.ParentType.ToUpper() == tableType && col.ParentName == tableName)
+                .Where(col => col.ParentType.ToUpper() == tableType && col.ParentName == tableName)
                 .ToList()
                 .ForEach(col => Console.WriteLine($"\t\tColumn '{col.Name}' with {col.DataType} data type {(col.IsNullable == "1" ? "accepts nulls" : "with no nulls")}"));
 
@@ -89,16 +90,5 @@ namespace ConsoleApp
                                     Console.WriteLine($"\tTable '{table.Schema}.{table.Name}' ({table.NumberOfChildren} columns)");
                                     PrintTablesColumns(table.Type, table.Name);
                                     });
-
-        public void PrintData()
-        {
-            importedObjects
-                .Where(database => database.Type == "DATABASE")
-                .ToList()
-                .ForEach(database => { 
-                                        Console.WriteLine($"Database '{database.Name}' ({database.NumberOfChildren} tables)");
-                                        PrintDatabaseTables(database.Type, database.Name)
-                                     });
-        }
     }
 }

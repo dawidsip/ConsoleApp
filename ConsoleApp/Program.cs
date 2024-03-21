@@ -7,8 +7,9 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            var reader = new DataProcessor();
-            reader.ImportAndPrintData("dataa.csv");
+            var processor = new DataProcessor();
+            processor.ImportData("data.csv");
+            processor.PrintData();
         }
     }
 }

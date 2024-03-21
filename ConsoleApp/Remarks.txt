@@ -3,13 +3,15 @@
 3. Since DataReader class is not only responsible for reading data perhaps a more suitable name, like DataProcessor would be more appropriate.
 4. ImportedObjectBaseClass is not quite a clean name for a base class, we can ditch the Class part an only leave ImportedObjectBase.
 5. In ImportedObject the Name property is already derived from the parent class.
-6. In ImportedObject some properties didn't have get; set; keywords
+6. In ImportedObject some properties didn't have get; set; keywords.
 7. In DataReader the namespace clause should be declared under the using statements.
 8. ImportedObjects seams like its a class field, and a private at that, and not a Property. Thus instead of CamelCase we should switch to pascalCase.
 9. now importedObjects does not need to be initialized with a one object. It can be left empty on initialization.
 10. The initialization of fields and properties is better expressed when it's hidden in a constructor.
 11. The ImportAndPrint method is not SOLID - compliant, it does whey to many things. Lets split it's logic into simpler methods.
-12. Console.ReadLine() does not do anything besides await a user response. Maybe this was left accidently and was once used as a debugging aid. We can safely throw it away.
+12. Console.ReadLine() does not do anything besides await a user response. Maybe this was left accidentally and was once used as a debugging aid. We can safely throw it away.
 13. Since we already import the Linq library, lets make use of it and swap the for loops for some Linq-methods.
 14. Assigning number of children is very nested, this usually means there is room for improvement/simplification, so lets give it a try.
-15. PrintData is another deeply nested structure that should be further simplified
+15. PrintData is another deeply nested structure that should be further simplified.
+16. Consider deleting some of the unused 'using' statements.
+17. In the Main method there was a typo, instead of data.csv there was dataa.csv.
